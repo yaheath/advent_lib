@@ -1,6 +1,6 @@
 use std::cmp::{min,max};
 use std::collections::HashMap;
-use std::collections::hash_map::Iter;
+use std::collections::hash_map::{Iter,IterMut};
 use std::io::Write;
 use std::ops::Range;
 
@@ -39,8 +39,26 @@ impl<T: Copy> InfiniteGrid<T> {
         inst
     }
 
+    pub fn from_other<U: Copy, F>(other: &InfiniteGrid<U>, default_val: T, mapfunc: F) -> Self
+            where F: Fn(U) -> Option<T> {
+        let mut inst = Self::new(default_val);
+        for y in other.y_bounds() {
+            for x in other.x_bounds() {
+                let other_val = other.get(x, y);
+                if let Some(val) = mapfunc(other_val) {
+                    inst.set(x, y, val);
+                }
+            }
+        }
+        inst
+    }
+
     pub fn iter(&self) -> Iter<(i64,i64),T> {
         self.data.iter()
+    }
+
+    pub fn iter_mut(&mut self) -> IterMut<(i64,i64),T> {
+        self.data.iter_mut()
     }
 
     pub fn clone(&self) -> Self {

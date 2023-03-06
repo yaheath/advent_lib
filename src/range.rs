@@ -1,6 +1,8 @@
 use std::cmp;
+use std::fmt;
 use std::ops::Range;
 use std::mem;
+use std::str::FromStr;
 use num::{Num, One};
 
 pub struct MergedRanges<T,I> {
@@ -99,4 +101,31 @@ impl<T: Clone + PartialOrd + Num + One> DoubleEndedIterator for BidirRangeInclIt
             Some(self.0.end.clone())
         }
     }
+}
+
+pub fn range_from_str<T>(s: &str) -> Result<Range<T>, String>
+    where T: FromStr + One + Num, <T as FromStr>::Err: fmt::Debug + fmt::Display
+{
+    let mut spl;
+    if s.contains("-") {
+        spl = s.split("-");
+    }
+    else if s.contains("..") {
+        spl = s.split("..");
+    }
+    else {
+        return Err("no separator found".into());
+    }
+    let start = spl
+        .next()
+        .ok_or("no value from split".to_string())?
+        .parse::<T>()
+        .map_err(|e| e.to_string())?;
+    let end = spl
+        .next()
+        .ok_or("no second value from split".to_string())?
+        .parse::<T>()
+        .map_err(|e| e.to_string())?
+        + T::one();
+    Ok(Range { start, end })
 }

@@ -104,3 +104,32 @@ pub fn grouped_test_input<T: FromStr>(data: &str) -> Vec<Vec<T>> {
     grouped_input_from_iter(data.lines().map(|l| l.into()))
 }
 
+pub fn sectioned_input_from_iter<T1: FromStr, T2: FromStr, I: Iterator<Item=String>>(mut line_iter: I) -> (Vec<T1>,Vec<T2>) {
+    let mut data1: Vec<T1> = Vec::new();
+    let mut data2: Vec<T2> = Vec::new();
+
+    while let Some(l) = line_iter.next() {
+        let l = l.trim_end();
+        if l.is_empty() { break; }
+        match l.parse::<T1>() {
+            Ok(val) => data1.push(val),
+            Err(_) => eprintln!("Invalid line: {}", l),
+        }
+    }
+    while let Some(l) = line_iter.next() {
+        let l = l.trim_end();
+        match l.parse::<T2>() {
+            Ok(val) => data2.push(val),
+            Err(_) => eprintln!("Invalid line: {}", l),
+        }
+    }
+    (data1, data2)
+}
+
+pub fn read_sectioned_input<T1: FromStr, T2: FromStr>() -> (Vec<T1>, Vec<T2>) {
+    sectioned_input_from_iter(input_lines())
+}
+
+pub fn sectioned_test_input<T1: FromStr, T2: FromStr>(data: &str) -> (Vec<T1>, Vec<T2>) {
+    sectioned_input_from_iter(data.lines().map(|l| l.into()))
+}
