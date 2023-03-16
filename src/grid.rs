@@ -147,6 +147,18 @@ impl<T: Copy> Grid<T> {
         }
     }
 
+    pub fn format<F>(&self, formatter: F) -> String
+            where F: Fn(T) -> char {
+        let mut s = String::with_capacity(self.y_size * (self.x_size + 1));
+        for y in self.min_y .. self.min_y + self.y_size as i64 {
+            for x in self.min_x .. self.min_x + self.x_size as i64 {
+                s.push(formatter(self.get(x, y)));
+            }
+            s.push('\n');
+        }
+        s
+    }
+
     pub fn find<F>(&self, predicate: F) -> Option<(i64, i64)>
             where F: Fn(T, i64, i64) -> bool {
         for y in self.min_y .. self.min_y + self.y_size as i64 {
@@ -326,6 +338,38 @@ impl<T: Copy> Grid<T> {
             data,
         }
     }
+
+    pub fn roll_row(&mut self, y: i64, n: i64) {
+        let go_left = n < 0;
+        let n = n.abs() % self.x_size as i64;
+        if n == 0 { return; }
+        let uy:usize = (y - self.min_y) as usize;
+        let idx = uy * self.x_size;
+        let row_slice = &mut self.data[idx .. idx + self.x_size];
+        if go_left {
+            row_slice.rotate_left(n as usize);
+        }
+        else {
+            row_slice.rotate_right(n as usize);
+        }
+    }
+
+    pub fn roll_col(&mut self, x: i64, n: i64) {
+        let go_up = n < 0;
+        let n = n.abs() % self.y_size as i64;
+        if n == 0 { return; }
+        let ux:usize = (x - self.min_x) as usize;
+        let mut col = Vec::from_iter(
+            (0..self.y_size).map(|row| self.data[row * self.x_size + ux])
+        );
+        if go_up {
+            col.rotate_left(n as usize);
+        }
+        else {
+            col.rotate_right(n as usize);
+        }
+        (0..self.y_size).for_each(|row| self.data[row * self.x_size + ux] = col[row]);
+    }
 }
 
 #[cfg(test)]
@@ -412,6 +456,48 @@ mod tests {
         assert_eq!(grid.get(7, 7), 9);
         assert_eq!(grid.get(5, 7), 29);
         assert_eq!(grid.get(6, -1), 11);
+    }
+
+    #[test]
+    fn test_roll_row() {
+        let mut grid: Grid<u32> = Grid::new(-2, -2, 2, 2, 0);
+        fill(&mut grid);
+        grid.roll_row(1, 3);
+        assert_eq!(grid.data, vec![ 0,  1,  2,  3,  4,
+                                    5,  6,  7,  8,  9,
+                                   10, 11, 12, 13, 14,
+                                   17, 18, 19, 15, 16,
+                                   20, 21, 22, 23, 24]);
+
+        let mut grid: Grid<u32> = Grid::new(-2, -2, 2, 2, 0);
+        fill(&mut grid);
+        grid.roll_row(1, -1);
+        assert_eq!(grid.data, vec![ 0,  1,  2,  3,  4,
+                                    5,  6,  7,  8,  9,
+                                   10, 11, 12, 13, 14,
+                                   16, 17, 18, 19, 15,
+                                   20, 21, 22, 23, 24]);
+    }
+
+    #[test]
+    fn test_roll_col() {
+        let mut grid: Grid<u32> = Grid::new(-2, -2, 2, 2, 0);
+        fill(&mut grid);
+        grid.roll_col(1, 3);
+        assert_eq!(grid.data, vec![ 0,  1,  2, 13,  4,
+                                    5,  6,  7, 18,  9,
+                                   10, 11, 12, 23, 14,
+                                   15, 16, 17,  3, 19,
+                                   20, 21, 22,  8, 24]);
+
+        let mut grid: Grid<u32> = Grid::new(-2, -2, 2, 2, 0);
+        fill(&mut grid);
+        grid.roll_col(1, -1);
+        assert_eq!(grid.data, vec![ 0,  1,  2,  8,  4,
+                                    5,  6,  7, 13,  9,
+                                   10, 11, 12, 18, 14,
+                                   15, 16, 17, 23, 19,
+                                   20, 21, 22,  3, 24]);
     }
 
 }
