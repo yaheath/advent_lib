@@ -1,4 +1,6 @@
 #[macro_use] extern crate lazy_static;
+pub mod bits;
+pub mod coords;
 pub mod grid;
 pub mod infinite_grid;
 pub mod math;
