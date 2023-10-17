@@ -103,7 +103,7 @@ impl<T: Clone + PartialOrd + Num + One> DoubleEndedIterator for BidirRangeInclIt
     }
 }
 
-pub fn range_from_str<T>(s: &str) -> Result<Range<T>, String>
+pub fn range_from_str<T>(s: &str, include_end: bool) -> Result<Range<T>, String>
     where T: FromStr + One + Num, <T as FromStr>::Err: fmt::Debug + fmt::Display
 {
     let mut spl;
@@ -125,7 +125,9 @@ pub fn range_from_str<T>(s: &str) -> Result<Range<T>, String>
         .next()
         .ok_or("no second value from split".to_string())?
         .parse::<T>()
-        .map_err(|e| e.to_string())?
-        + T::one();
-    Ok(Range { start, end })
+        .map_err(|e| e.to_string())?;
+    Ok(Range {
+        start,
+        end: if include_end { end + T::one() } else { end }
+    })
 }
