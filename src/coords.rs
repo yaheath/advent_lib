@@ -3,6 +3,7 @@ use std::ops::{
     Sub, SubAssign,
     Mul, MulAssign,
 };
+use std::str::FromStr;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum CDir {
@@ -69,6 +70,7 @@ impl Add for Coord2D {
         }
     }
 }
+
 impl AddAssign for Coord2D {
     fn add_assign(&mut self, other: Self) {
         *self = Self {
@@ -111,6 +113,17 @@ impl MulAssign<i64> for Coord2D {
             x: self.x * other,
             y: self.y * other,
         };
+    }
+}
+
+impl FromStr for Coord2D {
+    type Err = ();
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let mut itr = s.split(',');
+        Ok(Self {
+            x: itr.next().ok_or(()).map(|s| s.trim().parse::<i64>().map_err(|_| ()))??,
+            y: itr.next().ok_or(()).map(|s| s.trim().parse::<i64>().map_err(|_| ()))??,
+        })
     }
 }
 
@@ -183,5 +196,17 @@ impl MulAssign<i64> for Coord3D {
             y: self.y * other,
             z: self.z * other,
         };
+    }
+}
+
+impl FromStr for Coord3D {
+    type Err = ();
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let mut itr = s.split(',');
+        Ok(Self {
+            x: itr.next().ok_or(()).map(|s| s.trim().parse::<i64>().map_err(|_| ()))??,
+            y: itr.next().ok_or(()).map(|s| s.trim().parse::<i64>().map_err(|_| ()))??,
+            z: itr.next().ok_or(()).map(|s| s.trim().parse::<i64>().map_err(|_| ()))??,
+        })
     }
 }
