@@ -56,6 +56,14 @@ impl Coord2D {
             .map(|o| *self + *o)
             .collect()
     }
+    pub fn neighbors8(&self) -> Vec<Self> {
+        [ Coord2D::new(-1, 1), Coord2D::new(0, 1), Coord2D::new(1, 1),
+          Coord2D::new(-1, 0),                       Coord2D::new(1, 0),
+          Coord2D::new(-1, -1), Coord2D::new(0, -1), Coord2D::new(1, -1) ]
+            .iter()
+            .map(|o| *self + *o)
+            .collect()
+    }
     pub fn mdist_to(&self, other: &Self) -> i64 {
         (self.x - other.x).abs() + (self.y - other.y).abs()
     }
