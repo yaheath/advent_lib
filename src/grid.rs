@@ -12,6 +12,7 @@ pub struct Grid<T: Copy> {
     x_size: usize,
     y_size: usize,
     data: Vec<T>,
+    padding: i64,
 }
 
 impl<T: Copy> Grid<T> {
@@ -24,6 +25,7 @@ impl<T: Copy> Grid<T> {
             x_size: x_size,
             y_size: y_size,
             data: Vec::with_capacity(x_size * y_size),
+            padding: 0,
         };
         for _ in 0..x_size * y_size {
             g.data.push(initial_val);
@@ -37,6 +39,7 @@ impl<T: Copy> Grid<T> {
         let height = input.len() as i64;
         let mut y = 0i64;
         let mut inst = Self::new(-padding, -padding, width-1+padding, height-1+padding, default_val);
+        inst.padding = padding;
         for line in input.iter() {
             for (ux, c) in line.chars().enumerate() {
                 let x = ux as i64;
@@ -54,6 +57,7 @@ impl<T: Copy> Grid<T> {
             x_size: self.x_size,
             y_size: self.y_size,
             data: self.data.clone(),
+            padding: self.padding,
         }
     }
 
@@ -64,6 +68,7 @@ impl<T: Copy> Grid<T> {
             x_size: self.x_size,
             y_size: self.y_size,
             data: vec![initial_val; self.data.len()],
+            padding: self.padding,
         }
     }
 
@@ -125,6 +130,14 @@ impl<T: Copy> Grid<T> {
 
     pub fn y_bounds(&self) -> Range<i64> {
         self.min_y .. self.min_y + self.y_size as i64
+    }
+
+    // bounds not including padding (i.e., original size from input)
+    pub fn x_bounds_orig(&self) -> Range<i64> {
+        self.min_x + self.padding .. self.min_x + self.x_size as i64 - self.padding
+    }
+    pub fn y_bounds_orig(&self) -> Range<i64> {
+        self.min_y + self.padding .. self.min_y + self.y_size as i64 - self.padding
     }
 
     pub fn dump_to_file<F>(&self, file: &mut dyn Write, formatter: F)
@@ -195,6 +208,7 @@ impl<T: Copy> Grid<T> {
             x_size: wid as usize,
             y_size: hei as usize,
             data,
+            padding: 0,
         }
     }
 
@@ -239,6 +253,7 @@ impl<T: Copy> Grid<T> {
             x_size: width,
             y_size: height,
             data,
+            padding: 0,
         }
     }
 
@@ -265,6 +280,7 @@ impl<T: Copy> Grid<T> {
             x_size: self.x_size,
             y_size: self.y_size,
             data,
+            padding: self.padding,
         }
     }
 
@@ -292,6 +308,7 @@ impl<T: Copy> Grid<T> {
             x_size: self.x_size,
             y_size: self.y_size,
             data,
+            padding: self.padding,
         }
     }
 
@@ -319,6 +336,7 @@ impl<T: Copy> Grid<T> {
             x_size: self.x_size,
             y_size: self.y_size,
             data,
+            padding: self.padding,
         }
     }
 
@@ -336,6 +354,7 @@ impl<T: Copy> Grid<T> {
             x_size: self.y_size,
             y_size: self.x_size,
             data,
+            padding: self.padding,
         }
     }
 
