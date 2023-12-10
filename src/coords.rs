@@ -78,9 +78,27 @@ impl Add for Coord2D {
         }
     }
 }
-
+impl Add<CDir> for Coord2D {
+    type Output = Self;
+    fn add(self, other: CDir) -> Self {
+        let other = other.to_coord();
+        Self {
+            x: self.x + other.x,
+            y: self.y + other.y,
+        }
+    }
+}
 impl AddAssign for Coord2D {
     fn add_assign(&mut self, other: Self) {
+        *self = Self {
+            x: self.x + other.x,
+            y: self.y + other.y,
+        };
+    }
+}
+impl AddAssign<CDir> for Coord2D {
+    fn add_assign(&mut self, other: CDir) {
+        let other = other.to_coord();
         *self = Self {
             x: self.x + other.x,
             y: self.y + other.y,
@@ -97,8 +115,27 @@ impl Sub for Coord2D {
         }
     }
 }
+impl Sub<CDir> for Coord2D {
+    type Output = Self;
+    fn sub(self, other: CDir) -> Self {
+        let other = other.to_coord();
+        Self {
+            x: self.x - other.x,
+            y: self.y - other.y,
+        }
+    }
+}
 impl SubAssign for Coord2D {
     fn sub_assign(&mut self, other: Self) {
+        *self = Self {
+            x: self.x - other.x,
+            y: self.y - other.y,
+        };
+    }
+}
+impl SubAssign<CDir> for Coord2D {
+    fn sub_assign(&mut self, other: CDir) {
+        let other = other.to_coord();
         *self = Self {
             x: self.x - other.x,
             y: self.y - other.y,

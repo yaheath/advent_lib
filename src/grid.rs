@@ -5,6 +5,7 @@ use std::ops::Range;
 use std::slice::{Iter, IterMut};
 use std::vec::Vec;
 use itertools::Itertools;
+use crate::coords::Coord2D;
 
 pub struct Grid<T: Copy> {
     min_x: i64,
@@ -81,6 +82,10 @@ impl<T: Copy> Grid<T> {
         self.data[idx]
     }
 
+    pub fn get_c(&self, coord: Coord2D) -> T {
+        self.get(coord.x, coord.y)
+    }
+
     pub fn get_or_default(&self, x:i64, y:i64, default: T) -> T {
         if x >= self.min_x && x < self.min_x + self.x_size as i64
           && y >= self.min_y && y < self.min_y + self.y_size as i64 {
@@ -100,6 +105,10 @@ impl<T: Copy> Grid<T> {
         let uy:usize = (y - self.min_y) as usize;
         let idx = uy * self.x_size + ux;
         self.data[idx] = val;
+    }
+
+    pub fn set_c(&mut self, c: Coord2D, val:T) {
+        self.set(c.x, c.y, val);
     }
 
     pub fn iter(&self) -> Iter<T> {
