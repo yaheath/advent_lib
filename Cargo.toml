@@ -4,8 +4,10 @@ version = "1.0.0"
 description = "Yet Another Advent of Code Library"
 authors = ["Heath Kehoe <yaheath@gmail.com>"]
 edition = "2021"
-license = "CC BY-SA 4.0"
+license = "CC-BY-SA-4.0"
 repository = "https://github.com/yaheath/advent_lib"
+homepage = "https://github.com/yaheath"
+readme = "README.md"
 
 [dependencies]
 crossterm = "0.27.0"
