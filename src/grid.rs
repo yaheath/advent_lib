@@ -86,6 +86,11 @@ impl<T: Copy> Grid<T> {
         self.get(coord.x, coord.y)
     }
 
+    pub fn get_xform(&self, x:i64, y:i64, xform: GridTransform) -> T {
+        let (x,y) = self.apply_transform(x, y, xform);
+        self.get(x, y)
+    }
+
     pub fn get_or_default(&self, x:i64, y:i64, default: T) -> T {
         if x >= self.min_x && x < self.min_x + self.x_size as i64
           && y >= self.min_y && y < self.min_y + self.y_size as i64 {
@@ -96,6 +101,11 @@ impl<T: Copy> Grid<T> {
         } else {
             default
         }
+    }
+
+    pub fn get_or_default_xform(&self, x:i64, y:i64, default: T, xform: GridTransform) -> T {
+        let (x,y) = self.apply_transform(x, y, xform);
+        self.get_or_default(x, y, default)
     }
 
     pub fn set(&mut self, x:i64, y:i64, val:T) {
@@ -109,6 +119,11 @@ impl<T: Copy> Grid<T> {
 
     pub fn set_c(&mut self, c: Coord2D, val:T) {
         self.set(c.x, c.y, val);
+    }
+
+    pub fn set_xform(&mut self, x:i64, y:i64, val:T, xform: GridTransform) {
+        let (x,y) = self.apply_transform(x, y, xform);
+        self.set(x, y, val);
     }
 
     pub fn iter(&self) -> Iter<T> {
@@ -149,6 +164,49 @@ impl<T: Copy> Grid<T> {
         self.min_y + self.padding .. self.min_y + self.y_size as i64 - self.padding
     }
 
+    pub fn x_bounds_xform(&self, xform: GridTransform) -> Range<i64> {
+        match xform {
+            GridTransform::Rot90 |
+            GridTransform::Rot270 |
+            GridTransform::Rot90HFlip |
+            GridTransform::Rot270HFlip => self.y_bounds(),
+            GridTransform::Identity |
+            GridTransform::Rot180 |
+            GridTransform::HFlip |
+            GridTransform::VFlip => self.x_bounds(),
+        }
+    }
+    pub fn y_bounds_xform(&self, xform: GridTransform) -> Range<i64> {
+        match xform {
+            GridTransform::Rot90 |
+            GridTransform::Rot270 |
+            GridTransform::Rot90HFlip |
+            GridTransform::Rot270HFlip => self.x_bounds(),
+            GridTransform::Identity |
+            GridTransform::Rot180 |
+            GridTransform::HFlip |
+            GridTransform::VFlip => self.y_bounds(),
+        }
+    }
+
+    fn apply_transform(&self, x: i64, y: i64, xform: GridTransform) -> (i64, i64) {
+        let xsize = self.x_bounds().end - self.x_bounds().start;
+        let ysize = self.y_bounds().end - self.y_bounds().start;
+        let x = x - self.min_x;
+        let y = y - self.min_y;
+        let (x, y) = match xform {
+            GridTransform::Identity => (x, y),
+            GridTransform::Rot90 => (y, ysize - 1 - x),
+            GridTransform::Rot180 => (xsize - 1 - x, ysize - 1 - y),
+            GridTransform::Rot270 => (xsize - 1 - y, x),
+            GridTransform::HFlip => (xsize - 1 - x, y),
+            GridTransform::Rot90HFlip => (y, x),
+            GridTransform::VFlip => (x, ysize - 1 - y),
+            GridTransform::Rot270HFlip => (xsize - 1 - y, ysize - 1 - x),
+        };
+        (x + self.min_x, y + self.min_y)
+    }
+
     pub fn dump_to_file<F>(&self, file: &mut dyn Write, formatter: F)
             where F: Fn(T) -> char {
         for y in self.min_y .. self.min_y + self.y_size as i64 {
@@ -161,6 +219,16 @@ impl<T: Copy> Grid<T> {
 
     pub fn print<F>(&self, formatter: F)
             where F: Fn(T) -> char {
+        for y in self.min_y .. self.min_y + self.y_size as i64 {
+            for x in self.min_x .. self.min_x + self.x_size as i64 {
+                print!("{}", formatter(self.get(x, y)));
+            }
+            println!("");
+        }
+    }
+
+    pub fn print_str<F>(&self, formatter: F)
+            where F: Fn(T) -> String {
         for y in self.min_y .. self.min_y + self.y_size as i64 {
             for x in self.min_x .. self.min_x + self.x_size as i64 {
                 print!("{}", formatter(self.get(x, y)));
@@ -200,6 +268,24 @@ impl<T: Copy> Grid<T> {
                 callback(self.get(x, y), x, y);
             }
         }
+    }
+
+    pub fn rows(&self) -> Vec<Vec<T>> {
+        (0 .. self.y_size)
+            .into_iter()
+            .map(|y| Vec::from(&self.data[y * self.x_size .. (y + 1) * self.x_size]))
+            .collect()
+    }
+
+    pub fn cols(&self) -> Vec<Vec<T>> {
+        (0 .. self.x_size)
+            .into_iter()
+            .map(|x| Vec::from_iter(
+                    (0..self.y_size)
+                    .into_iter()
+                    .map(|y| self.data[x + y * self.x_size])
+            ))
+            .collect()
     }
 
     pub fn extract(&self, x: i64, y: i64, wid: i64, hei: i64) -> Self {
@@ -322,11 +408,16 @@ impl<T: Copy> Grid<T> {
     }
 
     pub fn rot180_inplace(&mut self) {
-        for row in 0 .. self.y_size / 2 {
+        for row in 0 .. (self.y_size + 1) / 2 {
             let rowidx = row * self.x_size;
             let row2idx = (self.y_size - 1 - row) * self.x_size;
-            for col in 0 .. self.x_size {
-                self.data.swap(rowidx + col, row2idx + (self.x_size - 1 - col));
+            let w = if rowidx == row2idx { self.x_size / 2 } else { self.x_size };
+            for col in 0 .. w {
+                let a = rowidx + col;
+                let b = row2idx + (self.x_size - 1 - col);
+                if a != b {
+                    self.data.swap(a, b);
+                }
             }
         }
     }
@@ -400,6 +491,19 @@ impl<T: Copy> Grid<T> {
     }
 }
 
+#[derive(Copy, Clone, Eq, PartialEq, Debug)]
+pub enum GridTransform {
+    Identity,
+    Rot90,
+    Rot180,
+    Rot270,
+    HFlip,
+    VFlip,
+    Rot90HFlip,
+    Rot270HFlip,
+}
+
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -412,6 +516,11 @@ mod tests {
                 c += 1;
             }
         }
+    }
+
+    #[allow(dead_code)]
+    fn print(grid: &Grid<u32>)  {
+        grid.print_str(|v| format!("{:3}", v));
     }
 
     #[test]
@@ -437,53 +546,63 @@ mod tests {
 
     #[test]
     fn test_h_flip() {
-        let mut grid: Grid<u32> = Grid::new(-2, -2, 7, 7, 0);
+        let mut grid: Grid<u32> = Grid::new(-2, -2, 7, 6, 0);
         fill(&mut grid);
         let grid2 = grid.h_flip();
         grid.h_flip_inplace();
         assert_eq!(grid.get(-2, -2), 9);
         assert_eq!(grid.get(-2, 0), 29);
-        assert_eq!(grid.get(7, 7), 90);
-        assert_eq!(grid.get(5, 7), 92);
+        assert_eq!(grid.get(7, 6), 80);
+        assert_eq!(grid.get(5, 6), 82);
         assert_eq!(grid.data, grid2.data);
     }
 
     #[test]
     fn test_v_flip() {
-        let mut grid: Grid<u32> = Grid::new(-2, -2, 7, 7, 0);
+        let mut grid: Grid<u32> = Grid::new(-2, -2, 7, 6, 0);
         fill(&mut grid);
         let grid2 = grid.v_flip();
         grid.v_flip_inplace();
-        assert_eq!(grid.get(-2, -2), 90);
-        assert_eq!(grid.get(-2, 0), 70);
-        assert_eq!(grid.get(7, 7), 9);
-        assert_eq!(grid.get(5, 7), 7);
+        assert_eq!(grid.get(-2, -2), 80);
+        assert_eq!(grid.get(-2, 0), 60);
+        assert_eq!(grid.get(7, 6), 9);
+        assert_eq!(grid.get(5, 6), 7);
         assert_eq!(grid.data, grid2.data);
     }
 
     #[test]
     fn test_rot180() {
-        let mut grid: Grid<u32> = Grid::new(-2, -2, 7, 7, 0);
+        let mut grid: Grid<u32> = Grid::new(-2, -2, 7, 6, 0);
         fill(&mut grid);
         let grid2 = grid.rot180();
         grid.rot180_inplace();
-        assert_eq!(grid.get(-2, -2), 99);
-        assert_eq!(grid.get(-2, 0), 79);
-        assert_eq!(grid.get(7, 7), 0);
-        assert_eq!(grid.get(5, 7), 2);
+        assert_eq!(grid.get(-2, -2), 89);
+        assert_eq!(grid.get(-2, 0), 69);
+        assert_eq!(grid.get(7, 6), 0);
+        assert_eq!(grid.get(5, 6), 2);
+        assert_eq!(grid.data, grid2.data);
+
+        let mut grid: Grid<u32> = Grid::new(-2, -2, 6, 7, 0);
+        fill(&mut grid);
+        let grid2 = grid.rot180();
+        grid.rot180_inplace();
+        assert_eq!(grid.get(-2, -2), 89);
+        assert_eq!(grid.get(-2, 0), 71);
+        assert_eq!(grid.get(6, 7), 0);
+        assert_eq!(grid.get(4, 7), 2);
         assert_eq!(grid.data, grid2.data);
     }
 
     #[test]
     fn test_rot90() {
-        let mut grid: Grid<u32> = Grid::new(-2, -2, 7, 7, 0);
+        let mut grid: Grid<u32> = Grid::new(-2, -2, 7, 6, 0);
         fill(&mut grid);
         let grid = grid.rot90();
-        assert_eq!(grid.get(-2, -2), 90);
-        assert_eq!(grid.get(-2, 0), 92);
-        assert_eq!(grid.get(7, 7), 9);
-        assert_eq!(grid.get(5, 7), 29);
-        assert_eq!(grid.get(6, -1), 11);
+        assert_eq!(grid.get(-2, -2), 80);
+        assert_eq!(grid.get(-2, 0), 82);
+        assert_eq!(grid.get(6, 7), 9);
+        assert_eq!(grid.get(5, 7), 19);
+        assert_eq!(grid.get(5, -1), 11);
     }
 
     #[test]
@@ -528,4 +647,46 @@ mod tests {
                                    20, 21, 22,  3, 24]);
     }
 
+    #[test]
+    fn test_xform() {
+        /*
+        let inp: Vec<&str> = vec![
+            "####..",
+            "#...#.",
+            "#...#.",
+            "####..",
+            "#.#...",
+            "#..#..",
+            "#...#.",
+        ];
+        let mut grid: Grid<char> = Grid::from_input(&inp, '.', 0, |c| c);
+        */
+        let mut grid: Grid<u32> = Grid::new(-2, -2, 2, 3, 0);
+        fill(&mut grid);
+
+        let grid2 = grid.rot90();
+        for y in grid2.y_bounds() {
+            for x in grid2.x_bounds() {
+                assert_eq!(grid.get_xform(x, y, GridTransform::Rot90), grid2.get(x, y));
+            }
+        }
+        let grid2 = grid.rot180();
+        for y in grid2.y_bounds() {
+            for x in grid2.x_bounds() {
+                assert_eq!(grid.get_xform(x, y, GridTransform::Rot180), grid2.get(x, y));
+            }
+        }
+        let grid2 = grid.h_flip();
+        for y in grid2.y_bounds() {
+            for x in grid2.x_bounds() {
+                assert_eq!(grid.get_xform(x, y, GridTransform::HFlip), grid2.get(x, y));
+            }
+        }
+        let grid2 = grid.v_flip();
+        for y in grid2.y_bounds() {
+            for x in grid2.x_bounds() {
+                assert_eq!(grid.get_xform(x, y, GridTransform::VFlip), grid2.get(x, y));
+            }
+        }
+    }
 }
