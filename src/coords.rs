@@ -5,7 +5,7 @@ use std::ops::{
 };
 use std::str::FromStr;
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Hash)]
 pub enum CDir {
     N, S, E, W,
 }
@@ -24,14 +24,6 @@ impl CDir {
             CDir::E => CDir::S,
             CDir::S => CDir::W,
             CDir::W => CDir::N,
-        }
-    }
-    pub fn to_coord(&self) -> Coord2D {
-        match self {
-            CDir::N => Coord2D::new(0, 1),
-            CDir::E => Coord2D::new(1, 0),
-            CDir::S => Coord2D::new(0, -1),
-            CDir::W => Coord2D::new(-1, 0),
         }
     }
 }
@@ -57,15 +49,26 @@ impl Coord2D {
             .collect()
     }
     pub fn neighbors8(&self) -> Vec<Self> {
-        [ Coord2D::new(-1, 1), Coord2D::new(0, 1), Coord2D::new(1, 1),
+        [ Coord2D::new(-1, -1), Coord2D::new(0, 1), Coord2D::new(1, -1),
           Coord2D::new(-1, 0),                       Coord2D::new(1, 0),
-          Coord2D::new(-1, -1), Coord2D::new(0, -1), Coord2D::new(1, -1) ]
+          Coord2D::new(-1, 1), Coord2D::new(0, -1), Coord2D::new(1, 1) ]
             .iter()
             .map(|o| *self + *o)
             .collect()
     }
     pub fn mdist_to(&self, other: &Self) -> i64 {
         (self.x - other.x).abs() + (self.y - other.y).abs()
+    }
+}
+
+impl From<CDir> for Coord2D {
+    fn from(value: CDir) -> Self {
+        match value {
+            CDir::N => Coord2D::new(0, -1),
+            CDir::E => Coord2D::new(1, 0),
+            CDir::S => Coord2D::new(0, 1),
+            CDir::W => Coord2D::new(-1, 0),
+        }
     }
 }
 
@@ -81,7 +84,7 @@ impl Add for Coord2D {
 impl Add<CDir> for Coord2D {
     type Output = Self;
     fn add(self, other: CDir) -> Self {
-        let other = other.to_coord();
+        let other: Coord2D = other.into();
         Self {
             x: self.x + other.x,
             y: self.y + other.y,
@@ -98,7 +101,7 @@ impl AddAssign for Coord2D {
 }
 impl AddAssign<CDir> for Coord2D {
     fn add_assign(&mut self, other: CDir) {
-        let other = other.to_coord();
+        let other: Coord2D = other.into();
         *self = Self {
             x: self.x + other.x,
             y: self.y + other.y,
@@ -118,7 +121,7 @@ impl Sub for Coord2D {
 impl Sub<CDir> for Coord2D {
     type Output = Self;
     fn sub(self, other: CDir) -> Self {
-        let other = other.to_coord();
+        let other: Coord2D = other.into();
         Self {
             x: self.x - other.x,
             y: self.y - other.y,
@@ -135,7 +138,7 @@ impl SubAssign for Coord2D {
 }
 impl SubAssign<CDir> for Coord2D {
     fn sub_assign(&mut self, other: CDir) {
-        let other = other.to_coord();
+        let other: Coord2D = other.into();
         *self = Self {
             x: self.x - other.x,
             y: self.y - other.y,

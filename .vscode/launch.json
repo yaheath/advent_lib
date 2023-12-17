@@ -7,16 +7,16 @@
         {
             "type": "lldb",
             "request": "launch",
-            "name": "Debug unit tests in library 'advent_lib'",
+            "name": "Debug unit tests in library 'ya_advent_lib'",
             "cargo": {
                 "args": [
                     "test",
                     "--no-run",
                     "--lib",
-                    "--package=advent_lib"
+                    "--package=ya_advent_lib"
                 ],
                 "filter": {
-                    "name": "advent_lib",
+                    "name": "ya_advent_lib",
                     "kind": "lib"
                 }
             },

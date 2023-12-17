@@ -20,22 +20,18 @@ impl<T: Copy> Grid<T> {
     pub fn new(min_x:i64, min_y:i64, max_x:i64, max_y:i64, initial_val: T) -> Self {
         let x_size = (max_x - min_x + 1) as usize;
         let y_size = (max_y - min_y + 1) as usize;
-        let mut g = Self {
+        Self {
             min_x: min_x,
             min_y: min_y,
             x_size: x_size,
             y_size: y_size,
-            data: Vec::with_capacity(x_size * y_size),
+            data: vec![initial_val; x_size * y_size],
             padding: 0,
-        };
-        for _ in 0..x_size * y_size {
-            g.data.push(initial_val);
         }
-        g
     }
 
-    pub fn from_input<F>(input: &Vec<String>, default_val: T, padding: i64, mapfunc: F) -> Self
-            where F: Fn(char) -> T {
+    pub fn from_input(input: &Vec<String>, default_val: T, padding: i64) -> Self
+            where T: From<char> {
         let width = input.iter().map(|s| s.len()).fold(0, |maxw, w| max(w, maxw)) as i64;
         let height = input.len() as i64;
         let mut y = 0i64;
@@ -44,11 +40,28 @@ impl<T: Copy> Grid<T> {
         for line in input.iter() {
             for (ux, c) in line.chars().enumerate() {
                 let x = ux as i64;
-                inst.set(x, y, mapfunc(c));
+                inst.set(x, y, c.into());
             }
             y += 1;
         }
         inst
+    }
+
+    pub fn try_from_input(input: &Vec<String>, default_val: T, padding: i64) -> Result<Self, <T as TryFrom<char>>::Error>
+            where T: TryFrom<char> {
+        let width = input.iter().map(|s| s.len()).fold(0, |maxw, w| max(w, maxw)) as i64;
+        let height = input.len() as i64;
+        let mut y = 0i64;
+        let mut inst = Self::new(-padding, -padding, width-1+padding, height-1+padding, default_val);
+        inst.padding = padding;
+        for line in input.iter() {
+            for (ux, c) in line.chars().enumerate() {
+                let x = ux as i64;
+                inst.set(x, y, c.try_into()?);
+            }
+            y += 1;
+        }
+        Ok(inst)
     }
 
     pub fn clone(&self) -> Self {
@@ -217,11 +230,11 @@ impl<T: Copy> Grid<T> {
         }
     }
 
-    pub fn print<F>(&self, formatter: F)
-            where F: Fn(T) -> char {
+    pub fn print(&self)
+            where T: Into<char> {
         for y in self.min_y .. self.min_y + self.y_size as i64 {
             for x in self.min_x .. self.min_x + self.x_size as i64 {
-                print!("{}", formatter(self.get(x, y)));
+                print!("{}", Into::<char>::into(self.get(x, y)));
             }
             println!("");
         }
@@ -237,12 +250,12 @@ impl<T: Copy> Grid<T> {
         }
     }
 
-    pub fn format<F>(&self, formatter: F) -> String
-            where F: Fn(T) -> char {
+    pub fn format(&self) -> String
+            where T: Into<char> {
         let mut s = String::with_capacity(self.y_size * (self.x_size + 1));
         for y in self.min_y .. self.min_y + self.y_size as i64 {
             for x in self.min_x .. self.min_x + self.x_size as i64 {
-                s.push(formatter(self.get(x, y)));
+                s.push(self.get(x, y).into());
             }
             s.push('\n');
         }
