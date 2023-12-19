@@ -120,6 +120,10 @@ impl<T: Copy> Grid<T> {
         let (x,y) = self.apply_transform(x, y, xform);
         self.get_or_default(x, y, default)
     }
+ 
+    pub fn contains_coord(&self, coord: Coord2D) -> bool {
+        self.x_bounds().contains(&coord.x) && self.y_bounds().contains(&coord.y)
+    }
 
     pub fn set(&mut self, x:i64, y:i64, val:T) {
         assert!(x >= self.min_x && x < self.min_x + self.x_size as i64);

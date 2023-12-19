@@ -3,6 +3,7 @@ use std::collections::HashMap;
 use std::collections::hash_map::{Iter,IterMut};
 use std::io::Write;
 use std::ops::Range;
+use crate::coords::Coord2D;
 
 pub struct InfiniteGrid<T: Copy> {
     default: T,
@@ -79,6 +80,9 @@ impl<T: Copy> InfiniteGrid<T> {
             self.default
         }
     }
+    pub fn get_c(&self, c:Coord2D) -> T {
+        self.get(c.x, c.y)
+    }
 
     pub fn set(&mut self, x:i64, y:i64, val:T) {
         self.data.insert((x, y), val);
@@ -102,6 +106,10 @@ impl<T: Copy> InfiniteGrid<T> {
         else if y >= self.y_range.end {
             self.y_range.end = y + 1;
         }
+    }
+
+    pub fn set_c(&mut self, c:Coord2D, val:T) {
+        self.set(c.x, c.y, val);
     }
 
     // Untested

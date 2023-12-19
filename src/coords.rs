@@ -5,9 +5,9 @@ use std::ops::{
 };
 use std::str::FromStr;
 
-#[derive(Clone, Copy, Debug, Eq, PartialEq, Hash)]
+#[derive(Clone, Copy, Debug, Eq, PartialEq, Hash, Ord, PartialOrd)]
 pub enum CDir {
-    N, S, E, W,
+    N, E, S, W,
 }
 impl CDir {
     pub fn left(&self) -> Self {
