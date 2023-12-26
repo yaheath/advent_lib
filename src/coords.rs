@@ -1,3 +1,4 @@
+use std::fmt;
 use std::ops::{
     Add, AddAssign,
     Sub, SubAssign,
@@ -42,6 +43,12 @@ impl Coord2D {
     pub fn new(x: i64, y: i64) -> Self {
         Coord2D { x, y }
     }
+    pub fn x() -> Self {
+        Coord2D { x:1, y:0 }
+    }
+    pub fn y() -> Self {
+        Coord2D { x:0, y:1 }
+    }
     pub fn neighbors4(&self) -> Vec<Self> {
         [ Coord2D::new(-1, 0), Coord2D::new(1, 0), Coord2D::new(0, -1), Coord2D::new(0, 1) ]
             .iter()
@@ -58,6 +65,12 @@ impl Coord2D {
     }
     pub fn mdist_to(&self, other: &Self) -> i64 {
         (self.x - other.x).abs() + (self.y - other.y).abs()
+    }
+}
+
+impl fmt::Display for Coord2D {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "({}, {})", self.x, self.y)
     }
 }
 
@@ -184,6 +197,21 @@ pub struct Coord3D {
 impl Coord3D {
     pub fn new(x: i64, y: i64, z: i64) -> Self {
         Coord3D { x, y, z }
+    }
+    pub fn x() -> Self {
+        Coord3D { x:1, y:0, z:0 }
+    }
+    pub fn y() -> Self {
+        Coord3D { x:0, y:1, z:0 }
+    }
+    pub fn z() -> Self {
+        Coord3D { x:0, y:0, z:1 }
+    }
+}
+
+impl fmt::Display for Coord3D {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "({}, {}, {})", self.x, self.y, self.z)
     }
 }
 

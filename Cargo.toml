@@ -1,6 +1,6 @@
 [package]
 name = "ya_advent_lib"
-version = "1.1.1"
+version = "1.2.0"
 description = "Yet Another Advent of Code Library"
 authors = ["Heath Kehoe <yaheath@gmail.com>"]
 edition = "2021"

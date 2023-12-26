@@ -1,6 +1,8 @@
 #[macro_use] extern crate lazy_static;
+pub mod algorithm;
 pub mod bits;
 pub mod coords;
+pub mod geom;
 pub mod grid;
 pub mod infinite_grid;
 pub mod iter;
