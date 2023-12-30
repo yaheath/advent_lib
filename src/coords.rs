@@ -85,18 +85,15 @@ impl From<CDir> for Coord2D {
     }
 }
 
-impl Add for Coord2D {
-    type Output = Self;
-    fn add(self, other: Self) -> Self {
-        Self {
-            x: self.x + other.x,
-            y: self.y + other.y,
-        }
+impl From<(i64, i64)> for Coord2D {
+    fn from(value: (i64, i64)) -> Self {
+        Self { x: value.0, y: value.1 }
     }
 }
-impl Add<CDir> for Coord2D {
+
+impl<T> Add<T> for Coord2D where T: Into<Coord2D> {
     type Output = Self;
-    fn add(self, other: CDir) -> Self {
+    fn add(self, other: T) -> Self {
         let other: Coord2D = other.into();
         Self {
             x: self.x + other.x,
@@ -104,16 +101,9 @@ impl Add<CDir> for Coord2D {
         }
     }
 }
-impl AddAssign for Coord2D {
-    fn add_assign(&mut self, other: Self) {
-        *self = Self {
-            x: self.x + other.x,
-            y: self.y + other.y,
-        };
-    }
-}
-impl AddAssign<CDir> for Coord2D {
-    fn add_assign(&mut self, other: CDir) {
+
+impl<T> AddAssign<T> for Coord2D where T: Into<Coord2D> {
+    fn add_assign(&mut self, other: T) {
         let other: Coord2D = other.into();
         *self = Self {
             x: self.x + other.x,
@@ -122,18 +112,9 @@ impl AddAssign<CDir> for Coord2D {
     }
 }
 
-impl Sub for Coord2D {
+impl<T> Sub<T> for Coord2D where T: Into<Coord2D> {
     type Output = Self;
-    fn sub(self, other: Self) -> Self {
-        Self {
-            x: self.x - other.x,
-            y: self.y - other.y,
-        }
-    }
-}
-impl Sub<CDir> for Coord2D {
-    type Output = Self;
-    fn sub(self, other: CDir) -> Self {
+    fn sub(self, other: T) -> Self {
         let other: Coord2D = other.into();
         Self {
             x: self.x - other.x,
@@ -141,16 +122,9 @@ impl Sub<CDir> for Coord2D {
         }
     }
 }
-impl SubAssign for Coord2D {
-    fn sub_assign(&mut self, other: Self) {
-        *self = Self {
-            x: self.x - other.x,
-            y: self.y - other.y,
-        };
-    }
-}
-impl SubAssign<CDir> for Coord2D {
-    fn sub_assign(&mut self, other: CDir) {
+
+impl<T> SubAssign<T> for Coord2D where T: Into<Coord2D> {
+    fn sub_assign(&mut self, other: T) {
         let other: Coord2D = other.into();
         *self = Self {
             x: self.x - other.x,
@@ -215,9 +189,16 @@ impl fmt::Display for Coord3D {
     }
 }
 
-impl Add for Coord3D {
+impl From<(i64,i64,i64)> for Coord3D {
+    fn from(v: (i64,i64,i64)) -> Self {
+        Coord3D { x: v.0, y: v.1, z: v.2 }
+    }
+}
+
+impl<T> Add<T> for Coord3D where T: Into<Coord3D> {
     type Output = Self;
-    fn add(self, other: Self) -> Self {
+    fn add(self, other: T) -> Self {
+        let other: Coord3D = other.into();
         Self {
             x: self.x + other.x,
             y: self.y + other.y,
@@ -225,8 +206,9 @@ impl Add for Coord3D {
         }
     }
 }
-impl AddAssign for Coord3D {
-    fn add_assign(&mut self, other: Self) {
+impl<T> AddAssign<T> for Coord3D where T: Into<Coord3D> {
+    fn add_assign(&mut self, other: T) {
+        let other: Coord3D = other.into();
         *self = Self {
             x: self.x + other.x,
             y: self.y + other.y,
@@ -235,9 +217,10 @@ impl AddAssign for Coord3D {
     }
 }
 
-impl Sub for Coord3D {
+impl<T> Sub<T> for Coord3D where T: Into<Coord3D> {
     type Output = Self;
-    fn sub(self, other: Self) -> Self {
+    fn sub(self, other: T) -> Self {
+        let other: Coord3D = other.into();
         Self {
             x: self.x - other.x,
             y: self.y - other.y,
@@ -245,8 +228,9 @@ impl Sub for Coord3D {
         }
     }
 }
-impl SubAssign for Coord3D {
-    fn sub_assign(&mut self, other: Self) {
+impl<T> SubAssign<T> for Coord3D where T: Into<Coord3D> {
+    fn sub_assign(&mut self, other: T) {
+        let other: Coord3D = other.into();
         *self = Self {
             x: self.x - other.x,
             y: self.y - other.y,

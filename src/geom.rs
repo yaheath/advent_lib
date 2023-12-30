@@ -30,6 +30,12 @@ impl fmt::Display for Point2D {
     }
 }
 
+impl From<(f64,f64)> for Point2D {
+    fn from(v: (f64, f64)) -> Self {
+        Self { x: v.0, y: v.1 }
+    }
+}
+
 impl Add for Point2D {
     type Output = Self;
     fn add(self, other: Self) -> Self {

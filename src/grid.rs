@@ -95,8 +95,10 @@ impl<T: Copy> Grid<T> {
         self.data[idx]
     }
 
-    pub fn get_c(&self, coord: Coord2D) -> T {
-        self.get(coord.x, coord.y)
+    pub fn get_c<C>(&self, coord: C) -> T
+    where C: Into<Coord2D> {
+        let c: Coord2D = coord.into();
+        self.get(c.x, c.y)
     }
 
     pub fn get_xform(&self, x:i64, y:i64, xform: GridTransform) -> T {
@@ -120,9 +122,11 @@ impl<T: Copy> Grid<T> {
         let (x,y) = self.apply_transform(x, y, xform);
         self.get_or_default(x, y, default)
     }
- 
-    pub fn contains_coord(&self, coord: Coord2D) -> bool {
-        self.x_bounds().contains(&coord.x) && self.y_bounds().contains(&coord.y)
+
+    pub fn contains_coord<C>(&self, coord: C) -> bool
+    where C: Into<Coord2D> {
+        let c: Coord2D = coord.into();
+        self.x_bounds().contains(&c.x) && self.y_bounds().contains(&c.y)
     }
 
     pub fn set(&mut self, x:i64, y:i64, val:T) {
@@ -134,7 +138,9 @@ impl<T: Copy> Grid<T> {
         self.data[idx] = val;
     }
 
-    pub fn set_c(&mut self, c: Coord2D, val:T) {
+    pub fn set_c<C>(&mut self, coord: C, val:T)
+    where C: Into<Coord2D> {
+        let c: Coord2D = coord.into();
         self.set(c.x, c.y, val);
     }
 
