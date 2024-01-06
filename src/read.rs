@@ -108,7 +108,7 @@ pub fn sectioned_input_from_iter<T1: FromStr, T2: FromStr, I: Iterator<Item=Stri
     let mut data1: Vec<T1> = Vec::new();
     let mut data2: Vec<T2> = Vec::new();
 
-    while let Some(l) = line_iter.next() {
+    for l in line_iter.by_ref() {
         let l = l.trim_end();
         if l.is_empty() { break; }
         match l.parse::<T1>() {
@@ -116,7 +116,7 @@ pub fn sectioned_input_from_iter<T1: FromStr, T2: FromStr, I: Iterator<Item=Stri
             Err(_) => eprintln!("Invalid line: {}", l),
         }
     }
-    while let Some(l) = line_iter.next() {
+    for l in line_iter {
         let l = l.trim_end();
         match l.parse::<T2>() {
             Ok(val) => data2.push(val),

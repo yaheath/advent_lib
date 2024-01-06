@@ -5,6 +5,7 @@ use std::io::Write;
 use std::ops::Range;
 use crate::coords::Coord2D;
 
+#[derive(Clone)]
 pub struct InfiniteGrid<T: Copy> {
     default: T,
     data: HashMap<(i64,i64),T>,
@@ -24,18 +25,17 @@ impl<T: Copy> InfiniteGrid<T> {
         }
     }
 
-    pub fn from_input<F>(input: &Vec<String>, default_val: T, mapfunc: F) -> Self
+    pub fn from_input<F>(input: &[String], default_val: T, mapfunc: F) -> Self
             where F: Fn(char, i64, i64) -> Option<T> {
-        let mut y = 0i64;
         let mut inst = Self::new(default_val);
-        for line in input.iter() {
+        for (uy, line) in input.iter().enumerate() {
             for (ux, c) in line.chars().enumerate() {
                 let x = ux as i64;
+                let y = uy as i64;
                 if let Some(val) = mapfunc(c, x, y) {
                     inst.set(x, y, val);
                 };
             }
-            y += 1;
         }
         inst
     }
@@ -60,16 +60,6 @@ impl<T: Copy> InfiniteGrid<T> {
 
     pub fn iter_mut(&mut self) -> IterMut<(i64,i64),T> {
         self.data.iter_mut()
-    }
-
-    pub fn clone(&self) -> Self {
-        Self {
-            default: self.default,
-            data: self.data.clone(),
-            x_range: self.x_range.clone(),
-            y_range: self.y_range.clone(),
-            flip_y: self.flip_y,
-        }
     }
 
     pub fn get(&self, x:i64, y:i64) -> T {
@@ -120,21 +110,29 @@ impl<T: Copy> InfiniteGrid<T> {
         let mut new_x_end: i64 = 0;
         let mut new_y_end: i64 = 0;
         for ((x, y), _) in self.data.iter() {
-            match min_x {
-                Some(val) => { if x < &val { r.push((*x, *y)); continue; } },
-                None => {},
+            if let Some(val) = min_x {
+                if x < &val {
+                    r.push((*x, *y));
+                    continue;
+                }
             }
-            match min_y {
-                Some(val) => { if y < &val { r.push((*x, *y)); continue; } },
-                None => {},
+            if let Some(val) = min_y {
+                if y < &val {
+                    r.push((*x, *y));
+                    continue;
+                }
             }
-            match max_x {
-                Some(val) => { if x > &val { r.push((*x, *y)); continue; } },
-                None => {},
+            if let Some(val) = max_x {
+                if x > &val {
+                    r.push((*x, *y));
+                    continue;
+                }
             }
-            match max_y {
-                Some(val) => { if y > &val { r.push((*x, *y)); continue; } },
-                None => {},
+            if let Some(val) = max_y {
+                if y > &val {
+                    r.push((*x, *y));
+                    continue;
+                }
             }
             if new_x_start == new_x_end {
                 new_x_start = *x;
@@ -175,7 +173,7 @@ impl<T: Copy> InfiniteGrid<T> {
             for x in self.x_range.clone() {
                 write!(file, "{}", formatter(self.get(x, y))).unwrap();
             }
-            writeln!(file, "").unwrap();
+            writeln!(file).unwrap();
         }
     }
 
@@ -186,14 +184,14 @@ impl<T: Copy> InfiniteGrid<T> {
                 for x in self.x_range.clone() {
                     print!("{}", formatter(self.get(x, y)));
                 }
-                println!("");
+                println!();
             }
         } else {
             for y in self.y_range.clone() {
                 for x in self.x_range.clone() {
                     print!("{}", formatter(self.get(x, y)));
                 }
-                println!("");
+                println!();
             }
         }
     }

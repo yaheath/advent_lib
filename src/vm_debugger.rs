@@ -116,10 +116,7 @@ impl<
     }
 
     fn is_halted(&self) -> bool {
-        match self.run_state {
-            RunState::Halt | RunState::Error => true,
-            _ => false,
-        }
+        matches!(self.run_state, RunState::Halt | RunState::Error)
     }
 
     fn run_impl<B: Backend>(&mut self, mut terminal: Terminal<B>) -> io::Result<()> {
@@ -343,7 +340,8 @@ impl<
 
         rows.iter()
             .map(|row| Line::from(
-                    row.into_iter().enumerate()
+                    row.iter()
+                    .enumerate()
                     .flat_map(|(idx, t)| {
                         let w = t.width();
                         let pad = Span::raw(" ".repeat(colwidths[idx] - w));
@@ -411,7 +409,7 @@ impl<
             ]);
         let rows: Vec<ListItem> = self.token_list(&mut itr)
             .into_iter()
-            .map(|line| ListItem::new(line))
+            .map(ListItem::new)
             .collect();
 
         let list = List::new(rows)

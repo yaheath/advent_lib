@@ -7,7 +7,7 @@ where I: Iterator, I::Item: Clone {
     where I::Item: Clone {
         if let Some(first) = self.next() {
             let mut last = first.clone();
-            while let Some(next) = self.next() {
+            for next in self {
                 last = next;
             }
             Some((first, last))

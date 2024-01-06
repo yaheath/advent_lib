@@ -7,6 +7,7 @@ use std::vec::Vec;
 use itertools::Itertools;
 use crate::coords::Coord2D;
 
+#[derive(Clone)]
 pub struct Grid<T: Copy> {
     min_x: i64,
     min_y: i64,
@@ -21,58 +22,46 @@ impl<T: Copy> Grid<T> {
         let x_size = (max_x - min_x + 1) as usize;
         let y_size = (max_y - min_y + 1) as usize;
         Self {
-            min_x: min_x,
-            min_y: min_y,
-            x_size: x_size,
-            y_size: y_size,
+            min_x, min_y,
+            x_size, y_size,
             data: vec![initial_val; x_size * y_size],
             padding: 0,
         }
     }
 
-    pub fn from_input(input: &Vec<String>, default_val: T, padding: i64) -> Self
-            where T: From<char> {
+    pub fn from_input(input: &[String], default_val: T, padding: i64) -> Self
+        where T: From<char>
+    {
+        Self::from_input_map(input, default_val, padding, |c:char| c.into())
+    }
+
+    pub fn from_input_map<F>(input: &[String], default_val: T, padding: i64, mapfunc: F) -> Self
+        where F: Fn(char) -> T
+    {
         let width = input.iter().map(|s| s.len()).fold(0, |maxw, w| max(w, maxw)) as i64;
         let height = input.len() as i64;
-        let mut y = 0i64;
         let mut inst = Self::new(-padding, -padding, width-1+padding, height-1+padding, default_val);
         inst.padding = padding;
-        for line in input.iter() {
+        for (uy, line) in input.iter().enumerate() {
             for (ux, c) in line.chars().enumerate() {
-                let x = ux as i64;
-                inst.set(x, y, c.into());
+                inst.set(ux as i64, uy as i64, mapfunc(c));
             }
-            y += 1;
         }
         inst
     }
 
-    pub fn try_from_input(input: &Vec<String>, default_val: T, padding: i64) -> Result<Self, <T as TryFrom<char>>::Error>
+    pub fn try_from_input(input: &[String], default_val: T, padding: i64) -> Result<Self, <T as TryFrom<char>>::Error>
             where T: TryFrom<char> {
         let width = input.iter().map(|s| s.len()).fold(0, |maxw, w| max(w, maxw)) as i64;
         let height = input.len() as i64;
-        let mut y = 0i64;
         let mut inst = Self::new(-padding, -padding, width-1+padding, height-1+padding, default_val);
         inst.padding = padding;
-        for line in input.iter() {
+        for (uy, line) in input.iter().enumerate() {
             for (ux, c) in line.chars().enumerate() {
-                let x = ux as i64;
-                inst.set(x, y, c.try_into()?);
+                inst.set(ux as i64, uy as i64, c.try_into()?);
             }
-            y += 1;
         }
         Ok(inst)
-    }
-
-    pub fn clone(&self) -> Self {
-        Grid {
-            min_x: self.min_x,
-            min_y: self.min_y,
-            x_size: self.x_size,
-            y_size: self.y_size,
-            data: self.data.clone(),
-            padding: self.padding,
-        }
     }
 
     pub fn clone_without_data(&self, initial_val: T) -> Self {
@@ -236,7 +225,7 @@ impl<T: Copy> Grid<T> {
             for x in self.min_x .. self.min_x + self.x_size as i64 {
                 write!(file, "{}", formatter(self.get(x, y))).unwrap();
             }
-            writeln!(file, "").unwrap();
+            writeln!(file).unwrap();
         }
     }
 
@@ -246,7 +235,7 @@ impl<T: Copy> Grid<T> {
             for x in self.min_x .. self.min_x + self.x_size as i64 {
                 print!("{}", Into::<char>::into(self.get(x, y)));
             }
-            println!("");
+            println!();
         }
     }
 
@@ -256,7 +245,7 @@ impl<T: Copy> Grid<T> {
             for x in self.min_x .. self.min_x + self.x_size as i64 {
                 print!("{}", formatter(self.get(x, y)));
             }
-            println!("");
+            println!();
         }
     }
 
@@ -293,22 +282,17 @@ impl<T: Copy> Grid<T> {
         }
     }
 
-    pub fn rows(&self) -> Vec<Vec<T>> {
+    pub fn rows(&self) -> impl Iterator<Item=Vec<T>> + '_ {
         (0 .. self.y_size)
-            .into_iter()
             .map(|y| Vec::from(&self.data[y * self.x_size .. (y + 1) * self.x_size]))
-            .collect()
     }
 
-    pub fn cols(&self) -> Vec<Vec<T>> {
+    pub fn cols(&self) -> impl Iterator<Item=Vec<T>> + '_ {
         (0 .. self.x_size)
-            .into_iter()
             .map(|x| Vec::from_iter(
                     (0..self.y_size)
-                    .into_iter()
                     .map(|y| self.data[x + y * self.x_size])
             ))
-            .collect()
     }
 
     pub fn extract(&self, x: i64, y: i64, wid: i64, hei: i64) -> Self {

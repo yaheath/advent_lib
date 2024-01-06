@@ -64,6 +64,11 @@ impl LineIter {
         }
     }
 }
+impl Default for LineIter {
+    fn default() -> Self {
+        Self::new()
+    }
+}
 
 fn parse_line<T: FromStr>(s: &str) -> Option<T>
     where <T as FromStr>::Err: SkippableErr
@@ -118,10 +123,8 @@ pub fn grouped_input_from_iter<T: FromStr, I: Iterator<Item=String>>(line_iter: 
             data.push(row);
             row = Vec::new();
         }
-        else {
-            if let Some(val) = parse_line(val) {
-                row.push(val);
-            }
+        else if let Some(val) = parse_line(val) {
+            row.push(val);
         }
     };
     if !row.is_empty() {
@@ -149,14 +152,14 @@ pub fn sectioned_input_from_iter<T1: FromStr, T2: FromStr, I: Iterator<Item=Stri
     let mut data1: Vec<T1> = Vec::new();
     let mut data2: Vec<T2> = Vec::new();
 
-    while let Some(l) = line_iter.next() {
+    for l in line_iter.by_ref() {
         let l = l.trim_end_matches('\n');
         if l.is_empty() { break; }
         if let Some(val) = parse_line(l) {
             data1.push(val);
         }
     }
-    while let Some(l) = line_iter.next() {
+    for l in line_iter {
         let l = l.trim_end_matches('\n');
         if let Some(val) = parse_line(l) {
             data2.push(val);

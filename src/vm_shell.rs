@@ -49,7 +49,7 @@ impl<RegKey: Hash + Eq, RegVal: Copy + TryFrom<usize>, Instr> VM<RegKey, RegVal,
     }
     pub fn get_reg(&self, r: RegKey) -> RegVal {
         self.registers.get(&r)
-            .map(|v| *v)
+            .copied()
             .unwrap_or(self.register_default)
     }
     pub fn set_reg(&mut self, r: RegKey, v: RegVal) {

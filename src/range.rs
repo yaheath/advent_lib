@@ -18,7 +18,7 @@ pub fn merge_ranges<T,I>(iterator: I) -> MergedRanges<T,I::IntoIter>
 
     MergedRanges {
         values: iterator,
-        last: last,
+        last,
     }
 }
 
@@ -60,11 +60,21 @@ impl<T: Clone> BidirRangeInclusive<T> {
     pub const fn new(start: T, end: T) -> Self {
         Self { start, end, exhausted: false }
     }
+    /*
     pub fn into_iter(self) -> BidirRangeInclIter<T> {
         BidirRangeInclIter(self)
     }
+    */
     pub fn iter(&self) -> BidirRangeInclIter<T> {
         BidirRangeInclIter(self.clone())
+    }
+}
+
+impl<T: Clone + PartialOrd + Num + One> IntoIterator for BidirRangeInclusive<T> {
+    type Item = T;
+    type IntoIter = BidirRangeInclIter<T>;
+    fn into_iter(self) -> Self::IntoIter {
+        BidirRangeInclIter(self)
     }
 }
 
@@ -103,6 +113,7 @@ impl<T: Clone + PartialOrd + Num + One> DoubleEndedIterator for BidirRangeInclIt
     }
 }
 
+#[allow(clippy::single_char_pattern)]
 pub fn range_from_str<T>(s: &str, include_end: bool) -> Result<Range<T>, String>
     where T: FromStr + One + Num, <T as FromStr>::Err: fmt::Debug + fmt::Display
 {

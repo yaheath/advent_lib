@@ -1,11 +1,11 @@
 use std::vec::Vec;
 use ya_advent_lib::read::read_input;
 
-fn part1(input: &Vec<String>) -> i64 {
+fn part1(input: &[String]) -> i64 {
     0
 }
 
-fn part2(input: &Vec<String>) -> i64 {
+fn part2(input: &[String]) -> i64 {
     0
 }
 

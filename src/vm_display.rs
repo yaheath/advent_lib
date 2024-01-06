@@ -11,6 +11,7 @@ pub enum Token<I: fmt::Display + fmt::LowerHex + fmt::UpperHex + TryFrom<usize> 
 pub struct Formatter<I: fmt::Display + fmt::LowerHex + fmt::UpperHex + TryFrom<usize> + Copy + Clone> {
     tokens: Vec<Token<I>>,
 }
+
 impl<I: fmt::Display + fmt::LowerHex + fmt::UpperHex + TryFrom<usize> + Copy + Clone> Formatter<I> {
     pub fn new() -> Self {
         Self { tokens: Vec::new() }
@@ -29,6 +30,12 @@ impl<I: fmt::Display + fmt::LowerHex + fmt::UpperHex + TryFrom<usize> + Copy + C
     }
     pub fn get_tokens(&self) -> &Vec<Token<I>> {
         &self.tokens
+    }
+}
+
+impl<I: fmt::Display + fmt::LowerHex + fmt::UpperHex + TryFrom<usize> + Copy + Clone> Default for Formatter<I> {
+    fn default() -> Self {
+        Self::new()
     }
 }
 

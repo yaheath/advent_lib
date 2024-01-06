@@ -181,6 +181,14 @@ impl Coord3D {
     pub fn z() -> Self {
         Coord3D { x:0, y:0, z:1 }
     }
+    pub fn neighbors6(&self) -> Vec<Self> {
+        [ Coord3D::new(-1, 0, 0), Coord3D::new(1, 0, 0),
+          Coord3D::new(0, -1, 0), Coord3D::new(0, 1, 0),
+          Coord3D::new(0, 0, -1), Coord3D::new(0, 0, 1), ]
+            .iter()
+            .map(|o| *self + *o)
+            .collect()
+    }
 }
 
 impl fmt::Display for Coord3D {
