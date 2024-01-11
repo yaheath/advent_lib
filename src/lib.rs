@@ -1,4 +1,3 @@
-#[macro_use] extern crate lazy_static;
 pub mod algorithm;
 pub mod bits;
 pub mod coords;
@@ -9,7 +8,6 @@ pub mod iter;
 pub mod math;
 pub mod range;
 pub mod read;
-pub mod read2;
 pub mod vm_debugger;
 pub mod vm_display;
 pub mod vm_shell;

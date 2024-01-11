@@ -261,6 +261,18 @@ impl<T: Copy> Grid<T> {
         s
     }
 
+    pub fn format_str<F>(&self, formatter: F) -> String
+            where F: Fn(T) -> String {
+        let mut s = String::with_capacity(self.y_size * (self.x_size + 1));
+        for y in self.min_y .. self.min_y + self.y_size as i64 {
+            for x in self.min_x .. self.min_x + self.x_size as i64 {
+                s.push_str(&formatter(self.get(x, y)));
+            }
+            s.push('\n');
+        }
+        s
+    }
+
     pub fn find<F>(&self, predicate: F) -> Option<(i64, i64)>
             where F: Fn(T, i64, i64) -> bool {
         for y in self.min_y .. self.min_y + self.y_size as i64 {

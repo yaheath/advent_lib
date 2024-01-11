@@ -34,6 +34,24 @@ pub enum Turn {
     L, R,
 }
 
+impl Add<Turn> for CDir {
+    type Output = Self;
+    fn add(self, other: Turn) -> Self {
+        match other {
+            Turn::L => self.left(),
+            Turn::R => self.right(),
+        }
+    }
+}
+impl AddAssign<Turn> for CDir {
+    fn add_assign(&mut self, other: Turn) {
+        *self = match other {
+            Turn::L => self.left(),
+            Turn::R => self.right(),
+        };
+    }
+}
+
 #[derive(Clone, Copy, Debug, Eq, Hash, PartialEq, Ord, PartialOrd)]
 pub struct Coord2D {
     pub x: i64,
@@ -180,6 +198,9 @@ impl Coord3D {
     }
     pub fn z() -> Self {
         Coord3D { x:0, y:0, z:1 }
+    }
+    pub fn mdist_to(&self, other: &Self) -> i64 {
+        (self.x - other.x).abs() + (self.y - other.y).abs() + (self.z - other.z).abs()
     }
     pub fn neighbors6(&self) -> Vec<Self> {
         [ Coord3D::new(-1, 0, 0), Coord3D::new(1, 0, 0),
