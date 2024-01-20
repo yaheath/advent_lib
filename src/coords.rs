@@ -3,6 +3,7 @@ use std::ops::{
     Add, AddAssign,
     Sub, SubAssign,
     Mul, MulAssign,
+    Neg,
 };
 use std::str::FromStr;
 
@@ -49,6 +50,18 @@ impl AddAssign<Turn> for CDir {
             Turn::L => self.left(),
             Turn::R => self.right(),
         };
+    }
+}
+
+impl Neg for CDir {
+    type Output = Self;
+    fn neg(self) -> Self::Output {
+        match self {
+            CDir::N => CDir::S,
+            CDir::E => CDir::W,
+            CDir::W => CDir::E,
+            CDir::S => CDir::N,
+        }
     }
 }
 
@@ -106,6 +119,12 @@ impl From<CDir> for Coord2D {
 impl From<(i64, i64)> for Coord2D {
     fn from(value: (i64, i64)) -> Self {
         Self { x: value.0, y: value.1 }
+    }
+}
+
+impl From<Coord2D> for (i64, i64) {
+    fn from(value: Coord2D) -> Self {
+        (value.x, value.y)
     }
 }
 
@@ -221,6 +240,12 @@ impl fmt::Display for Coord3D {
 impl From<(i64,i64,i64)> for Coord3D {
     fn from(v: (i64,i64,i64)) -> Self {
         Coord3D { x: v.0, y: v.1, z: v.2 }
+    }
+}
+
+impl From<Coord3D> for (i64,i64,i64) {
+    fn from(value: Coord3D) -> Self {
+        (value.x, value.y, value.z)
     }
 }
 
