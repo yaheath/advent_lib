@@ -7,11 +7,13 @@ pub fn a_star<NodeType, TFn, NFn, HFn>(
     start: NodeType,
     target_test: TFn,
     neighbors: NFn,
-    heuristic: HFn) -> Option<usize>
-where NodeType: Copy + Hash + Ord,
-      TFn: Fn(NodeType) -> bool,
-      NFn: Fn(NodeType) -> Vec<(NodeType, usize)>,
-      HFn: Fn(NodeType) -> usize,
+    heuristic: HFn,
+) -> Option<usize>
+where
+    NodeType: Copy + Hash + Ord,
+    TFn: Fn(NodeType) -> bool,
+    NFn: Fn(NodeType) -> Vec<(NodeType, usize)>,
+    HFn: Fn(NodeType) -> usize,
 {
     let mut queue: BinaryHeap<(Reverse<usize>, NodeType)> = BinaryHeap::new();
     let mut traversed: HashMap<NodeType, usize> = HashMap::new();
@@ -34,10 +36,15 @@ where NodeType: Copy + Hash + Ord,
     None
 }
 
-pub fn dijkstra<NodeType, TFn, NFn>(start: NodeType, target_test: TFn, neighbors: NFn) -> Option<usize>
-where NodeType: Copy + Hash + Ord,
-      TFn: Fn(NodeType) -> bool,
-      NFn: Fn(NodeType) -> Vec<(NodeType, usize)>,
+pub fn dijkstra<NodeType, TFn, NFn>(
+    start: NodeType,
+    target_test: TFn,
+    neighbors: NFn,
+) -> Option<usize>
+where
+    NodeType: Copy + Hash + Ord,
+    TFn: Fn(NodeType) -> bool,
+    NFn: Fn(NodeType) -> Vec<(NodeType, usize)>,
 {
     a_star(start, target_test, neighbors, |_| 0)
 }

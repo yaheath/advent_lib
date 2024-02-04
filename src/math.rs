@@ -2,7 +2,7 @@ pub fn firstfac(x: u64) -> u64 {
     if x % 2 == 0 {
         return 2;
     };
-     for n in (3..).step_by(2).take_while(|m| m*m <= x) {
+    for n in (3..).step_by(2).take_while(|m| m * m <= x) {
         if x % n == 0 {
             return n;
         };

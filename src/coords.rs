@@ -1,15 +1,13 @@
 use std::fmt;
-use std::ops::{
-    Add, AddAssign,
-    Sub, SubAssign,
-    Mul, MulAssign,
-    Neg,
-};
+use std::ops::{Add, AddAssign, Mul, MulAssign, Neg, Sub, SubAssign};
 use std::str::FromStr;
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Hash, Ord, PartialOrd)]
 pub enum CDir {
-    N, E, S, W,
+    N,
+    E,
+    S,
+    W,
 }
 impl CDir {
     pub fn left(&self) -> Self {
@@ -32,7 +30,8 @@ impl CDir {
 
 #[derive(Clone, Copy, Debug, Eq, PartialEq)]
 pub enum Turn {
-    L, R,
+    L,
+    R,
 }
 
 impl Add<Turn> for CDir {
@@ -75,24 +74,32 @@ impl Coord2D {
         Coord2D { x, y }
     }
     pub fn x() -> Self {
-        Coord2D { x:1, y:0 }
+        Coord2D { x: 1, y: 0 }
     }
     pub fn y() -> Self {
-        Coord2D { x:0, y:1 }
+        Coord2D { x: 0, y: 1 }
     }
+    #[rustfmt::skip]
     pub fn neighbors4(&self) -> Vec<Self> {
-        [ Coord2D::new(-1, 0), Coord2D::new(1, 0), Coord2D::new(0, -1), Coord2D::new(0, 1) ]
-            .iter()
-            .map(|o| *self + *o)
-            .collect()
+        [
+                      Coord2D::new(0, -1),
+            Coord2D::new(-1, 0), Coord2D::new(1, 0),
+                      Coord2D::new(0, 1),
+        ]
+        .iter()
+        .map(|o| *self + *o)
+        .collect()
     }
+    #[rustfmt::skip]
     pub fn neighbors8(&self) -> Vec<Self> {
-        [ Coord2D::new(-1, -1), Coord2D::new(0, 1), Coord2D::new(1, -1),
-          Coord2D::new(-1, 0),                       Coord2D::new(1, 0),
-          Coord2D::new(-1, 1), Coord2D::new(0, -1), Coord2D::new(1, 1) ]
-            .iter()
-            .map(|o| *self + *o)
-            .collect()
+        [
+            Coord2D::new(-1, -1), Coord2D::new(0, -1), Coord2D::new(1, -1),
+            Coord2D::new(-1, 0),                       Coord2D::new(1, 0),
+            Coord2D::new(-1, 1),  Coord2D::new(0, 1),  Coord2D::new(1, 1),
+        ]
+        .iter()
+        .map(|o| *self + *o)
+        .collect()
     }
     pub fn mdist_to(&self, other: &Self) -> i64 {
         (self.x - other.x).abs() + (self.y - other.y).abs()
@@ -118,7 +125,10 @@ impl From<CDir> for Coord2D {
 
 impl From<(i64, i64)> for Coord2D {
     fn from(value: (i64, i64)) -> Self {
-        Self { x: value.0, y: value.1 }
+        Self {
+            x: value.0,
+            y: value.1,
+        }
     }
 }
 
@@ -128,7 +138,10 @@ impl From<Coord2D> for (i64, i64) {
     }
 }
 
-impl<T> Add<T> for Coord2D where T: Into<Coord2D> {
+impl<T> Add<T> for Coord2D
+where
+    T: Into<Coord2D>,
+{
     type Output = Self;
     fn add(self, other: T) -> Self {
         let other: Coord2D = other.into();
@@ -139,7 +152,10 @@ impl<T> Add<T> for Coord2D where T: Into<Coord2D> {
     }
 }
 
-impl<T> AddAssign<T> for Coord2D where T: Into<Coord2D> {
+impl<T> AddAssign<T> for Coord2D
+where
+    T: Into<Coord2D>,
+{
     fn add_assign(&mut self, other: T) {
         let other: Coord2D = other.into();
         *self = Self {
@@ -149,7 +165,10 @@ impl<T> AddAssign<T> for Coord2D where T: Into<Coord2D> {
     }
 }
 
-impl<T> Sub<T> for Coord2D where T: Into<Coord2D> {
+impl<T> Sub<T> for Coord2D
+where
+    T: Into<Coord2D>,
+{
     type Output = Self;
     fn sub(self, other: T) -> Self {
         let other: Coord2D = other.into();
@@ -160,7 +179,10 @@ impl<T> Sub<T> for Coord2D where T: Into<Coord2D> {
     }
 }
 
-impl<T> SubAssign<T> for Coord2D where T: Into<Coord2D> {
+impl<T> SubAssign<T> for Coord2D
+where
+    T: Into<Coord2D>,
+{
     fn sub_assign(&mut self, other: T) {
         let other: Coord2D = other.into();
         *self = Self {
@@ -193,8 +215,14 @@ impl FromStr for Coord2D {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let mut itr = s.split(',');
         Ok(Self {
-            x: itr.next().ok_or(()).map(|s| s.trim().parse::<i64>().map_err(|_| ()))??,
-            y: itr.next().ok_or(()).map(|s| s.trim().parse::<i64>().map_err(|_| ()))??,
+            x: itr
+                .next()
+                .ok_or(())
+                .map(|s| s.trim().parse::<i64>().map_err(|_| ()))??,
+            y: itr
+                .next()
+                .ok_or(())
+                .map(|s| s.trim().parse::<i64>().map_err(|_| ()))??,
         })
     }
 }
@@ -210,24 +238,29 @@ impl Coord3D {
         Coord3D { x, y, z }
     }
     pub fn x() -> Self {
-        Coord3D { x:1, y:0, z:0 }
+        Coord3D { x: 1, y: 0, z: 0 }
     }
     pub fn y() -> Self {
-        Coord3D { x:0, y:1, z:0 }
+        Coord3D { x: 0, y: 1, z: 0 }
     }
     pub fn z() -> Self {
-        Coord3D { x:0, y:0, z:1 }
+        Coord3D { x: 0, y: 0, z: 1 }
     }
     pub fn mdist_to(&self, other: &Self) -> i64 {
         (self.x - other.x).abs() + (self.y - other.y).abs() + (self.z - other.z).abs()
     }
     pub fn neighbors6(&self) -> Vec<Self> {
-        [ Coord3D::new(-1, 0, 0), Coord3D::new(1, 0, 0),
-          Coord3D::new(0, -1, 0), Coord3D::new(0, 1, 0),
-          Coord3D::new(0, 0, -1), Coord3D::new(0, 0, 1), ]
-            .iter()
-            .map(|o| *self + *o)
-            .collect()
+        [
+            Coord3D::new(-1, 0, 0),
+            Coord3D::new(1, 0, 0),
+            Coord3D::new(0, -1, 0),
+            Coord3D::new(0, 1, 0),
+            Coord3D::new(0, 0, -1),
+            Coord3D::new(0, 0, 1),
+        ]
+        .iter()
+        .map(|o| *self + *o)
+        .collect()
     }
 }
 
@@ -237,19 +270,26 @@ impl fmt::Display for Coord3D {
     }
 }
 
-impl From<(i64,i64,i64)> for Coord3D {
-    fn from(v: (i64,i64,i64)) -> Self {
-        Coord3D { x: v.0, y: v.1, z: v.2 }
+impl From<(i64, i64, i64)> for Coord3D {
+    fn from(v: (i64, i64, i64)) -> Self {
+        Coord3D {
+            x: v.0,
+            y: v.1,
+            z: v.2,
+        }
     }
 }
 
-impl From<Coord3D> for (i64,i64,i64) {
+impl From<Coord3D> for (i64, i64, i64) {
     fn from(value: Coord3D) -> Self {
         (value.x, value.y, value.z)
     }
 }
 
-impl<T> Add<T> for Coord3D where T: Into<Coord3D> {
+impl<T> Add<T> for Coord3D
+where
+    T: Into<Coord3D>,
+{
     type Output = Self;
     fn add(self, other: T) -> Self {
         let other: Coord3D = other.into();
@@ -260,7 +300,10 @@ impl<T> Add<T> for Coord3D where T: Into<Coord3D> {
         }
     }
 }
-impl<T> AddAssign<T> for Coord3D where T: Into<Coord3D> {
+impl<T> AddAssign<T> for Coord3D
+where
+    T: Into<Coord3D>,
+{
     fn add_assign(&mut self, other: T) {
         let other: Coord3D = other.into();
         *self = Self {
@@ -271,7 +314,10 @@ impl<T> AddAssign<T> for Coord3D where T: Into<Coord3D> {
     }
 }
 
-impl<T> Sub<T> for Coord3D where T: Into<Coord3D> {
+impl<T> Sub<T> for Coord3D
+where
+    T: Into<Coord3D>,
+{
     type Output = Self;
     fn sub(self, other: T) -> Self {
         let other: Coord3D = other.into();
@@ -282,7 +328,10 @@ impl<T> Sub<T> for Coord3D where T: Into<Coord3D> {
         }
     }
 }
-impl<T> SubAssign<T> for Coord3D where T: Into<Coord3D> {
+impl<T> SubAssign<T> for Coord3D
+where
+    T: Into<Coord3D>,
+{
     fn sub_assign(&mut self, other: T) {
         let other: Coord3D = other.into();
         *self = Self {
@@ -318,9 +367,18 @@ impl FromStr for Coord3D {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let mut itr = s.split(',');
         Ok(Self {
-            x: itr.next().ok_or(()).map(|s| s.trim().parse::<i64>().map_err(|_| ()))??,
-            y: itr.next().ok_or(()).map(|s| s.trim().parse::<i64>().map_err(|_| ()))??,
-            z: itr.next().ok_or(()).map(|s| s.trim().parse::<i64>().map_err(|_| ()))??,
+            x: itr
+                .next()
+                .ok_or(())
+                .map(|s| s.trim().parse::<i64>().map_err(|_| ()))??,
+            y: itr
+                .next()
+                .ok_or(())
+                .map(|s| s.trim().parse::<i64>().map_err(|_| ()))??,
+            z: itr
+                .next()
+                .ok_or(())
+                .map(|s| s.trim().parse::<i64>().map_err(|_| ()))??,
         })
     }
 }

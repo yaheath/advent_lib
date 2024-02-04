@@ -1,17 +1,18 @@
+use num::{Num, One};
 use std::cmp;
 use std::fmt;
-use std::ops::Range;
 use std::mem;
+use std::ops::Range;
 use std::str::FromStr;
-use num::{Num, One};
 
-pub struct MergedRanges<T,I> {
+pub struct MergedRanges<T, I> {
     values: I,
-    last: Option<Range<T>>
+    last: Option<Range<T>>,
 }
 
-pub fn merge_ranges<T,I>(iterator: I) -> MergedRanges<T,I::IntoIter>
-    where I: IntoIterator<Item=Range<T>>
+pub fn merge_ranges<T, I>(iterator: I) -> MergedRanges<T, I::IntoIter>
+where
+    I: IntoIterator<Item = Range<T>>,
 {
     let mut iterator = iterator.into_iter();
     let last = iterator.next();
@@ -22,8 +23,10 @@ pub fn merge_ranges<T,I>(iterator: I) -> MergedRanges<T,I::IntoIter>
     }
 }
 
-impl<T,I> Iterator for MergedRanges<T,I>
-    where T: Ord + Clone, I: Iterator<Item=Range<T>>
+impl<T, I> Iterator for MergedRanges<T, I>
+where
+    T: Ord + Clone,
+    I: Iterator<Item = Range<T>>,
 {
     type Item = Range<T>;
 
@@ -58,7 +61,11 @@ pub struct BidirRangeInclIter<T: Clone>(BidirRangeInclusive<T>);
 
 impl<T: Clone> BidirRangeInclusive<T> {
     pub const fn new(start: T, end: T) -> Self {
-        Self { start, end, exhausted: false }
+        Self {
+            start,
+            end,
+            exhausted: false,
+        }
     }
     /*
     pub fn into_iter(self) -> BidirRangeInclIter<T> {
@@ -115,16 +122,16 @@ impl<T: Clone + PartialOrd + Num + One> DoubleEndedIterator for BidirRangeInclIt
 
 #[allow(clippy::single_char_pattern)]
 pub fn range_from_str<T>(s: &str, include_end: bool) -> Result<Range<T>, String>
-    where T: FromStr + One + Num, <T as FromStr>::Err: fmt::Debug + fmt::Display
+where
+    T: FromStr + One + Num,
+    <T as FromStr>::Err: fmt::Debug + fmt::Display,
 {
     let mut spl;
     if s.contains("-") {
         spl = s.split("-");
-    }
-    else if s.contains("..") {
+    } else if s.contains("..") {
         spl = s.split("..");
-    }
-    else {
+    } else {
         return Err("no separator found".into());
     }
     let start = spl
@@ -139,6 +146,6 @@ pub fn range_from_str<T>(s: &str, include_end: bool) -> Result<Range<T>, String>
         .map_err(|e| e.to_string())?;
     Ok(Range {
         start,
-        end: if include_end { end + T::one() } else { end }
+        end: if include_end { end + T::one() } else { end },
     })
 }

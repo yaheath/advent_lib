@@ -1,14 +1,14 @@
-use std::cmp::{min,max};
+use crate::coords::Coord2D;
+use std::cmp::{max, min};
+use std::collections::hash_map::{Iter, IterMut};
 use std::collections::HashMap;
-use std::collections::hash_map::{Iter,IterMut};
 use std::io::Write;
 use std::ops::Range;
-use crate::coords::Coord2D;
 
 #[derive(Clone)]
 pub struct InfiniteGrid<T: Copy> {
     default: T,
-    data: HashMap<(i64,i64),T>,
+    data: HashMap<(i64, i64), T>,
     x_range: Range<i64>,
     y_range: Range<i64>,
     flip_y: bool,
@@ -26,7 +26,9 @@ impl<T: Copy> InfiniteGrid<T> {
     }
 
     pub fn from_input<F>(input: &[String], default_val: T, mapfunc: F) -> Self
-            where F: Fn(char, i64, i64) -> Option<T> {
+    where
+        F: Fn(char, i64, i64) -> Option<T>,
+    {
         let mut inst = Self::new(default_val);
         for (uy, line) in input.iter().enumerate() {
             for (ux, c) in line.chars().enumerate() {
@@ -41,7 +43,9 @@ impl<T: Copy> InfiniteGrid<T> {
     }
 
     pub fn from_other<U: Copy, F>(other: &InfiniteGrid<U>, default_val: T, mapfunc: F) -> Self
-            where F: Fn(U) -> Option<T> {
+    where
+        F: Fn(U) -> Option<T>,
+    {
         let mut inst = Self::new(default_val);
         for y in other.y_bounds() {
             for x in other.x_bounds() {
@@ -54,57 +58,58 @@ impl<T: Copy> InfiniteGrid<T> {
         inst
     }
 
-    pub fn iter(&self) -> Iter<(i64,i64),T> {
+    pub fn iter(&self) -> Iter<(i64, i64), T> {
         self.data.iter()
     }
 
-    pub fn iter_mut(&mut self) -> IterMut<(i64,i64),T> {
+    pub fn iter_mut(&mut self) -> IterMut<(i64, i64), T> {
         self.data.iter_mut()
     }
 
-    pub fn get(&self, x:i64, y:i64) -> T {
+    pub fn get(&self, x: i64, y: i64) -> T {
         if let Some(cell) = self.data.get(&(x, y)) {
             *cell
-        }
-        else {
+        } else {
             self.default
         }
     }
-    pub fn get_c(&self, c:Coord2D) -> T {
+    pub fn get_c(&self, c: Coord2D) -> T {
         self.get(c.x, c.y)
     }
 
-    pub fn set(&mut self, x:i64, y:i64, val:T) {
+    pub fn set(&mut self, x: i64, y: i64, val: T) {
         self.data.insert((x, y), val);
         if self.x_range.is_empty() {
             self.x_range.start = x;
             self.x_range.end = x + 1;
-        }
-        else if x < self.x_range.start {
+        } else if x < self.x_range.start {
             self.x_range.start = x;
-        }
-        else if x >= self.x_range.end {
+        } else if x >= self.x_range.end {
             self.x_range.end = x + 1;
         }
         if self.y_range.is_empty() {
             self.y_range.start = y;
             self.y_range.end = y + 1;
-        }
-        else if y < self.y_range.start {
+        } else if y < self.y_range.start {
             self.y_range.start = y;
-        }
-        else if y >= self.y_range.end {
+        } else if y >= self.y_range.end {
             self.y_range.end = y + 1;
         }
     }
 
-    pub fn set_c(&mut self, c:Coord2D, val:T) {
+    pub fn set_c(&mut self, c: Coord2D, val: T) {
         self.set(c.x, c.y, val);
     }
 
     // Untested
-    pub fn purge(&mut self, min_x: Option<i64>, min_y: Option<i64>, max_x: Option<i64>, max_y: Option<i64>) {
-        let mut r: Vec<(i64,i64)> = Vec::new();
+    pub fn purge(
+        &mut self,
+        min_x: Option<i64>,
+        min_y: Option<i64>,
+        max_x: Option<i64>,
+        max_y: Option<i64>,
+    ) {
+        let mut r: Vec<(i64, i64)> = Vec::new();
         let mut new_x_start: i64 = 0;
         let mut new_y_start: i64 = 0;
         let mut new_x_end: i64 = 0;
@@ -168,7 +173,9 @@ impl<T: Copy> InfiniteGrid<T> {
     }
 
     pub fn dump_to_file<F>(&self, file: &mut dyn Write, formatter: F)
-            where F: Fn(T) -> char {
+    where
+        F: Fn(T) -> char,
+    {
         for y in self.y_range.clone() {
             for x in self.x_range.clone() {
                 write!(file, "{}", formatter(self.get(x, y))).unwrap();
@@ -178,7 +185,9 @@ impl<T: Copy> InfiniteGrid<T> {
     }
 
     pub fn print<F>(&self, formatter: F)
-            where F: Fn(T) -> char {
+    where
+        F: Fn(T) -> char,
+    {
         if self.flip_y {
             for y in self.y_range.clone().rev() {
                 for x in self.x_range.clone() {

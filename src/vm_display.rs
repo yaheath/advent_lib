@@ -8,7 +8,9 @@ pub enum Token<I: fmt::Display + fmt::LowerHex + fmt::UpperHex + TryFrom<usize> 
     Address(I),
 }
 
-pub struct Formatter<I: fmt::Display + fmt::LowerHex + fmt::UpperHex + TryFrom<usize> + Copy + Clone> {
+pub struct Formatter<
+    I: fmt::Display + fmt::LowerHex + fmt::UpperHex + TryFrom<usize> + Copy + Clone,
+> {
     tokens: Vec<Token<I>>,
 }
 
@@ -33,12 +35,17 @@ impl<I: fmt::Display + fmt::LowerHex + fmt::UpperHex + TryFrom<usize> + Copy + C
     }
 }
 
-impl<I: fmt::Display + fmt::LowerHex + fmt::UpperHex + TryFrom<usize> + Copy + Clone> Default for Formatter<I> {
+impl<I: fmt::Display + fmt::LowerHex + fmt::UpperHex + TryFrom<usize> + Copy + Clone> Default
+    for Formatter<I>
+{
     fn default() -> Self {
         Self::new()
     }
 }
 
-pub trait InstructionDisplay<I: fmt::Display + fmt::LowerHex + fmt::UpperHex + TryFrom<usize> + Copy + Clone> {
+pub trait InstructionDisplay<
+    I: fmt::Display + fmt::LowerHex + fmt::UpperHex + TryFrom<usize> + Copy + Clone,
+>
+{
     fn fmt(&self, fmt: &mut Formatter<I>);
 }

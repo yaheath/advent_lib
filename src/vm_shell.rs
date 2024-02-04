@@ -21,7 +21,11 @@ pub enum RunResult {
 }
 
 pub trait CPU<RegKey, RegVal: TryFrom<usize>, Instr> {
-    fn execute_instruction(&self, vm: &mut VM<RegKey, RegVal, Instr>, i: &Instr) -> InstructionResult;
+    fn execute_instruction(
+        &self,
+        vm: &mut VM<RegKey, RegVal, Instr>,
+        i: &Instr,
+    ) -> InstructionResult;
 }
 
 pub struct VM<RegKey, RegVal: TryFrom<usize>, Instr> {
@@ -48,14 +52,13 @@ impl<RegKey: Hash + Eq, RegVal: Copy + TryFrom<usize>, Instr> VM<RegKey, RegVal,
         self.pc = 0;
     }
     pub fn get_reg(&self, r: RegKey) -> RegVal {
-        self.registers.get(&r)
+        self.registers
+            .get(&r)
             .copied()
             .unwrap_or(self.register_default)
     }
     pub fn set_reg(&mut self, r: RegKey, v: RegVal) {
-        self.registers.entry(r)
-            .and_modify(|p| *p = v)
-            .or_insert(v);
+        self.registers.entry(r).and_modify(|p| *p = v).or_insert(v);
     }
 }
 
@@ -63,19 +66,12 @@ pub struct VMShell<RegKey, RegVal: TryFrom<usize>, Instr> {
     pub vm: VM<RegKey, RegVal, Instr>,
 }
 
-impl<
-    RegKey: Hash + Eq + Ord + PartialOrd,
-    RegVal: Copy + TryFrom<usize>,
-    Instr: Clone,
-> VMShell<RegKey, RegVal, Instr> {
-    pub fn new(
-        program: Vec<Instr>,
-        register_default: RegVal) -> Self
-    {
+impl<RegKey: Hash + Eq + Ord + PartialOrd, RegVal: Copy + TryFrom<usize>, Instr: Clone>
+    VMShell<RegKey, RegVal, Instr>
+{
+    pub fn new(program: Vec<Instr>, register_default: RegVal) -> Self {
         let vm = VM::new(program, register_default);
-        Self {
-            vm,
-        }
+        Self { vm }
     }
 
     pub fn reset(&mut self) {
@@ -83,21 +79,36 @@ impl<
     }
 
     pub fn step(&mut self, cpu: &dyn CPU<RegKey, RegVal, Instr>) -> RunResult {
-        if self.vm.is_halted() { return RunResult::Halt; }
+        if self.vm.is_halted() {
+            return RunResult::Halt;
+        }
         let inst = self.vm.program[self.vm.pc].clone();
         match cpu.execute_instruction(&mut self.vm, &inst) {
-            InstructionResult::Ok => { self.vm.pc += 1; },
-            InstructionResult::Halt => { self.vm.pc = usize::MAX; return RunResult::Halt; },
-            InstructionResult::Break => { self.vm.pc += 1; return RunResult::Break; },
-            InstructionResult::Err => { return RunResult::Err; },
-            InstructionResult::JumpFwd(n) => { self.vm.pc = self.vm.pc.saturating_add(n); },
-            InstructionResult::JumpBck(n) => { self.vm.pc = self.vm.pc.overflowing_sub(n).0; },
+            InstructionResult::Ok => {
+                self.vm.pc += 1;
+            }
+            InstructionResult::Halt => {
+                self.vm.pc = usize::MAX;
+                return RunResult::Halt;
+            }
+            InstructionResult::Break => {
+                self.vm.pc += 1;
+                return RunResult::Break;
+            }
+            InstructionResult::Err => {
+                return RunResult::Err;
+            }
+            InstructionResult::JumpFwd(n) => {
+                self.vm.pc = self.vm.pc.saturating_add(n);
+            }
+            InstructionResult::JumpBck(n) => {
+                self.vm.pc = self.vm.pc.overflowing_sub(n).0;
+            }
         }
         if self.vm.pc > self.vm.program.len() {
             self.vm.pc = usize::MAX;
             RunResult::Halt
-        }
-        else {
+        } else {
             RunResult::Ok
         }
     }
@@ -106,8 +117,10 @@ impl<
         loop {
             let r = self.step(cpu);
             match r {
-                RunResult::Ok => {},
-                _ => { return r; }
+                RunResult::Ok => {}
+                _ => {
+                    return r;
+                }
             }
         }
     }

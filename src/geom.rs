@@ -1,9 +1,5 @@
 use std::fmt;
-use std::ops::{
-    Add, AddAssign,
-    Sub, SubAssign,
-    Mul, MulAssign,
-};
+use std::ops::{Add, AddAssign, Mul, MulAssign, Sub, SubAssign};
 use std::str::FromStr;
 
 #[derive(Clone, Copy, Debug, PartialEq, PartialOrd)]
@@ -17,10 +13,10 @@ impl Point2D {
         Self { x, y }
     }
     pub fn x() -> Self {
-        Self { x:1_f64, y:0_f64 }
+        Self { x: 1_f64, y: 0_f64 }
     }
     pub fn y() -> Self {
-        Self { x:0_f64, y:1_f64 }
+        Self { x: 0_f64, y: 1_f64 }
     }
 }
 
@@ -30,7 +26,7 @@ impl fmt::Display for Point2D {
     }
 }
 
-impl From<(f64,f64)> for Point2D {
+impl From<(f64, f64)> for Point2D {
     fn from(v: (f64, f64)) -> Self {
         Self { x: v.0, y: v.1 }
     }
@@ -95,8 +91,14 @@ impl FromStr for Point2D {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let mut itr = s.split(',');
         Ok(Self {
-            x: itr.next().ok_or(()).map(|s| s.trim().parse::<f64>().map_err(|_| ()))??,
-            y: itr.next().ok_or(()).map(|s| s.trim().parse::<f64>().map_err(|_| ()))??,
+            x: itr
+                .next()
+                .ok_or(())
+                .map(|s| s.trim().parse::<f64>().map_err(|_| ()))??,
+            y: itr
+                .next()
+                .ok_or(())
+                .map(|s| s.trim().parse::<f64>().map_err(|_| ()))??,
         })
     }
 }
@@ -112,15 +114,16 @@ impl Ray2D {
     }
     pub fn intersect_with(&self, other: &Ray2D) -> Option<Point2D> {
         let det = other.dir.x * self.dir.y - other.dir.y * self.dir.x;
-        if det == 0.0 { return None; }
+        if det == 0.0 {
+            return None;
+        }
 
         let d = other.origin - self.origin;
         let u = (d.y * other.dir.x - d.x * other.dir.y) / det;
         let v = (d.y * self.dir.x - d.x * self.dir.y) / det;
         if u > 0.0 && v > 0.0 {
             Some(self.origin + self.dir * u)
-        }
-        else {
+        } else {
             None
         }
     }
@@ -138,13 +141,25 @@ impl Point3D {
         Self { x, y, z }
     }
     pub fn x() -> Self {
-        Self { x:1_f64, y:0_f64, z:0_f64 }
+        Self {
+            x: 1_f64,
+            y: 0_f64,
+            z: 0_f64,
+        }
     }
     pub fn y() -> Self {
-        Self { x:0_f64, y:1_f64, z:0_f64 }
+        Self {
+            x: 0_f64,
+            y: 1_f64,
+            z: 0_f64,
+        }
     }
     pub fn z() -> Self {
-        Self { x:0_f64, y:0_f64, z:1_f64 }
+        Self {
+            x: 0_f64,
+            y: 0_f64,
+            z: 1_f64,
+        }
     }
 
     pub fn cross(&self, other: Self) -> Self {
@@ -230,9 +245,18 @@ impl FromStr for Point3D {
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         let mut itr = s.split(',');
         Ok(Self {
-            x: itr.next().ok_or(()).map(|s| s.trim().parse::<f64>().map_err(|_| ()))??,
-            y: itr.next().ok_or(()).map(|s| s.trim().parse::<f64>().map_err(|_| ()))??,
-            z: itr.next().ok_or(()).map(|s| s.trim().parse::<f64>().map_err(|_| ()))??,
+            x: itr
+                .next()
+                .ok_or(())
+                .map(|s| s.trim().parse::<f64>().map_err(|_| ()))??,
+            y: itr
+                .next()
+                .ok_or(())
+                .map(|s| s.trim().parse::<f64>().map_err(|_| ()))??,
+            z: itr
+                .next()
+                .ok_or(())
+                .map(|s| s.trim().parse::<f64>().map_err(|_| ()))??,
         })
     }
 }
